@@ -262,3 +262,123 @@ document.getElementById('search').addEventListener('input', (e) => {
 
 // Initialize
 fetchMovies();
+
+
+// Authentication
+let currentUser = null;
+
+// Check if user is logged in
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+        currentUser = JSON.parse(user);
+        updateUIForLoggedInUser();
+    }
+}
+
+function updateUIForLoggedInUser() {
+    document.getElementById('login-btn').classList.add('hidden');
+    document.getElementById('register-btn').classList.add('hidden');
+    document.getElementById('logout-btn').classList.remove('hidden');
+    document.getElementById('user-info').classList.remove('hidden');
+    document.getElementById('user-info').textContent = `Welcome, ${currentUser.username}!`;
+}
+
+function showLoginModal() {
+    document.getElementById('modal-title').textContent = 'Login';
+    document.getElementById('username-field').classList.add('hidden');
+    document.getElementById('auth-modal').classList.remove('hidden');
+    document.getElementById('auth-form').onsubmit = handleLogin;
+}
+
+function showRegisterModal() {
+    document.getElementById('modal-title').textContent = 'Register';
+    document.getElementById('username-field').classList.remove('hidden');
+    document.getElementById('auth-modal').classList.remove('hidden');
+    document.getElementById('auth-form').onsubmit = handleRegister;
+}
+
+function closeAuthModal() {
+    document.getElementById('auth-modal').classList.add('hidden');
+    document.getElementById('auth-form').reset();
+    document.getElementById('error-message').classList.add('hidden');
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            currentUser = data.user;
+            closeAuthModal();
+            updateUIForLoggedInUser();
+            alert('Registration successful! Welcome to StreamBox!');
+        } else {
+            document.getElementById('error-message').textContent = data.error || 'Registration failed';
+            document.getElementById('error-message').classList.remove('hidden');
+        }
+    } catch (error) {
+        document.getElementById('error-message').textContent = 'Network error. Please try again.';
+        document.getElementById('error-message').classList.remove('hidden');
+    }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            currentUser = data.user;
+            closeAuthModal();
+            updateUIForLoggedInUser();
+            alert(`Welcome back, ${data.user.username}!`);
+        } else {
+            document.getElementById('error-message').textContent = data.error || 'Login failed';
+            document.getElementById('error-message').classList.remove('hidden');
+        }
+    } catch (error) {
+        document.getElementById('error-message').textContent = 'Network error. Please try again.';
+        document.getElementById('error-message').classList.remove('hidden');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    currentUser = null;
+    document.getElementById('login-btn').classList.remove('hidden');
+    document.getElementById('register-btn').classList.remove('hidden');
+    document.getElementById('logout-btn').classList.add('hidden');
+    document.getElementById('user-info').classList.add('hidden');
+    alert('Logged out successfully!');
+}
+
+// Check auth on page load
+checkAuth();

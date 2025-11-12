@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::env;
 
+mod models;
+mod db;
+mod auth;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Movie {
     id: u32,
@@ -268,27 +272,50 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     
     println!("🎬 StreamBox Server Starting...");
+    
+    // Initialize MongoDB
+    let database = match db::init_db().await {
+        Ok(db) => {
+            println!("✅ MongoDB connected");
+            Some(db)
+        }
+        Err(e) => {
+            println!("⚠️  MongoDB connection failed: {}", e);
+            println!("⚠️  Running without authentication features");
+            None
+        }
+    };
+    
     println!("🌐 Frontend: http://localhost:8080");
     println!("🔌 API: http://localhost:8080/api");
     println!("🎥 TMDb Integration: Active");
     println!("📡 Fetching real movie data from TMDb");
     println!("\n✨ Server ready!");
     
-    HttpServer::new(|| {
-        App::new()
+    HttpServer::new(move || {
+        let mut app = App::new()
             .wrap(
                 actix_cors::Cors::default()
                     .allow_any_origin()
                     .allow_any_method()
                     .allow_any_header()
-            )
-            .service(
+            );
+        
+        // Add database to app data if available
+        if let Some(ref db) = database {
+            app = app.app_data(web::Data::new(db.clone()));
+        }
+        
+        app.service(
                 web::scope("/api")
                     .route("/health", web::get().to(health))
                     .route("/movies", web::get().to(get_movies))
                     .route("/search", web::get().to(search_movies))
                     .route("/movies/{id}", web::get().to(get_movie_by_id))
                     .route("/movies/{id}/videos", web::get().to(get_movie_videos))
+                    // Auth routes
+                    .route("/auth/register", web::post().to(auth::register))
+                    .route("/auth/login", web::post().to(auth::login))
             )
             .service(fs::Files::new("/", "./public").index_file("index.html"))
     })
