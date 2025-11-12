@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StreamBox - Movie Streaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0b0b0b;
+            color: #f3f3f3;
+            font-family: sans-serif;
+        }
+        .bg-blur {
+            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <header class="sticky top-0 z-40 bg-blur border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="text-2xl font-bold text-amber-400">StreamBox</div>
+                <nav class="hidden md:flex gap-3 text-sm text-gray-300">
+                    <button class="px-3 py-2 rounded bg-white/6" onclick="filterByCategory('all')">Home</button>
+                    <button class="px-3 py-2 rounded hover:bg-white/3" onclick="filterByCategory('movie')">Movies</button>
+                    <button class="px-3 py-2 rounded hover:bg-white/3" onclick="filterByCategory('tv')">TV Shows</button>
+                    <button class="px-3 py-2 rounded hover:bg-white/3" onclick="filterByCategory('top')">Top Rated</button>
+                </nav>
+            </div>
+            <div class="flex-1 max-w-xl">
+                <div class="relative">
+                    <input
+                        id="search"
+                        placeholder="Search movies, genres, actors..."
+                        class="w-full pl-4 pr-10 py-2 rounded bg-white/5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <div class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="text-sm px-3 py-1 rounded bg-white/6">Login</button>
+                <button class="text-sm px-3 py-1 rounded bg-amber-500 text-black font-semibold">Subscribe</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <section class="relative rounded-xl overflow-hidden shadow-lg" id="hero">
+            <img
+                id="hero-img"
+                src=""
+                class="w-full h-64 object-cover brightness-75"
+                alt="Hero"
+            />
+            <div class="absolute inset-0 flex items-end p-6">
+                <div>
+                    <h2 id="hero-title" class="text-3xl md:text-4xl font-bold">Loading...</h2>
+                    <p id="hero-sub" class="text-sm text-gray-300 mt-1">...</p>
+                    <div class="mt-4 flex gap-3">
+                        <button class="px-4 py-2 rounded bg-white text-black font-semibold">▶ Play</button>
+                        <button class="px-4 py-2 rounded bg-white/6">ℹ More Info</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('all')">All</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('Action')">Action</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('Drama')">Drama</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('Comedy')">Comedy</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('Thriller')">Thriller</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByGenre('Sci-Fi')">Sci-fi</button>
+            <button class="px-3 py-1 rounded bg-white/6 text-sm" onclick="filterByYear(2024)">2024+</button>
+        </div>
+
+        <section class="mt-6">
+            <h3 class="text-xl font-semibold mb-4" id="section-title">Popular Movies</h3>
+            <div id="loading" class="text-center py-12 text-gray-400">Loading movies...</div>
+            <div id="movies-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+        </section>
+
+        <div class="mt-8 flex items-center justify-center gap-2">
+            <button class="px-3 py-1 rounded bg-white/6" onclick="changePage(-1)">Prev</button>
+            <button class="px-3 py-1 rounded bg-amber-500 text-black font-semibold" id="current-page">1</button>
+            <button class="px-3 py-1 rounded bg-white/6" onclick="changePage(1)">Next</button>
+        </div>
+
+        <footer class="mt-12 text-center text-sm text-gray-500 pb-12">
+            <p>StreamBox - Your ultimate movie streaming platform. Powered by Rust backend.</p>
+        </footer>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
