@@ -286,8 +286,15 @@ async fn main() -> std::io::Result<()> {
         }
     };
     
-    println!("🌐 Frontend: http://localhost:8080");
-    println!("🔌 API: http://localhost:8080/api");
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse::<u16>()
+        .unwrap_or(8080);
+    let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let bind_address = format!("{}:{}", host, port);
+    
+    println!("🌐 Binding server to: http://{}", bind_address);
+    println!("🔌 API path: http://{}/api", bind_address);
     println!("🎥 TMDb Integration: Active");
     println!("📡 Fetching real movie data from TMDb");
     println!("\n✨ Server ready!");
@@ -319,7 +326,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(fs::Files::new("/", "./public").index_file("index.html"))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(&bind_address)?
     .run()
     .await
 }
